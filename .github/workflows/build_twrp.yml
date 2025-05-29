@@ -29,11 +29,11 @@ jobs:
           cd ~/twrp
           git clone https://github.com/devhunter1/android_device_samsung_a15x device/samsung/a15x
 
-          # Dummy kernel (agar tidak error)
+          # Dummy kernel
           mkdir -p kernel/samsung/a15x
           echo "// dummy kernel" > kernel/samsung/a15x/Android.mk
 
-          # Dummy vendor (agar tidak error)
+          # Dummy vendor
           mkdir -p vendor/samsung/a15x
           echo "// dummy vendor" > vendor/samsung/a15x/Android.mk
 
@@ -45,7 +45,7 @@ jobs:
           make -j$(nproc) recoveryimage
 
       - name: Upload output
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v3.1.2
         with:
           name: twrp-recovery.img
           path: ~/twrp/out/target/product/a15x/recovery.img
