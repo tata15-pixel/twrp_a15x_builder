@@ -1,0 +1,52 @@
+name: Build TWRP for A15 5G
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout source
+      uses: actions/checkout@v3
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y git-core gnupg flex bison build-essential zip curl zlib1g-dev gcc-multilib g++-multilib \
+          libc6-dev-i386 lib32ncurses5-dev x11proto-core-dev libx11-dev lib32z-dev ccache libgl1-mesa-dev libxml2-utils \
+          xsltproc unzip python-is-python3 openjdk-8-jdk wget
+
+    - name: Setup Repo Tool
+      run: |
+        mkdir ~/bin || true
+        curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
+        chmod a+x ~/bin/repo
+        echo 'export PATH=~/bin:$PATH' >> ~/.bashrc
+        source ~/.bashrc
+
+    - name: Initialize Repo
+      run: |
+        mkdir -p ~/twrp && cd ~/twrp
+        git config --global user.email "you@example.com"
+        git config --global user.name "Your Name"
+        repo init -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git -b twrp-12.1
+        repo sync -j4
+
+    - name: Clone Device Tree
+      run: |
+        cd ~/twrp
+        git clone https://github.com/tata15-pixel/twrp_a15x_builder.git device/samsung/a15x
+
+    - name: Build TWRP
+      run: |
+        cd ~/twrp
+        source build/envsetup.sh
+        lunch twrp_a15x-eng
+        mka recoveryimage
+
+    - name: Upload TWRP Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: twrp-recovery
+        path: ~/twrp/out/target/product/*/recovery.img
