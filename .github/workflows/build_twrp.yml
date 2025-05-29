@@ -5,7 +5,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04  # lebih stabil daripada ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout this repo
@@ -29,10 +29,11 @@ jobs:
           cd ~/twrp
           git clone https://github.com/devhunter1/android_device_samsung_a15x device/samsung/a15x
 
-          # dummy kernel & vendor supaya build nggak error
+          # Dummy kernel (agar tidak error)
           mkdir -p kernel/samsung/a15x
           echo "// dummy kernel" > kernel/samsung/a15x/Android.mk
 
+          # Dummy vendor (agar tidak error)
           mkdir -p vendor/samsung/a15x
           echo "// dummy vendor" > vendor/samsung/a15x/Android.mk
 
@@ -44,7 +45,7 @@ jobs:
           make -j$(nproc) recoveryimage
 
       - name: Upload output
-        uses: actions/upload-artifact@v2  # versi stabil
+        uses: actions/upload-artifact@v3
         with:
           name: twrp-recovery.img
           path: ~/twrp/out/target/product/a15x/recovery.img
