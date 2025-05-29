@@ -6,38 +6,38 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout source
+      - name: Checkout this repo
         uses: actions/checkout@v3
 
-      - name: Install dependencies
+      - name: Set up build environment
         run: |
           sudo apt update
-          sudo apt install -y git wget curl python3 openjdk-8-jdk bc bison build-essential ccache flex g++-multilib gcc-multilib gnupg gperf imagemagick lib32ncurses5-dev lib32readline-dev lib32z1-dev liblz4-tool libncurses5-dev libsdl1.2-dev libssl-dev libxml2 libxml2-utils lzop pngcrush rsync schedtool squashfs-tools xsltproc zip zlib1g-dev
-
-      - name: Setup environment
-        run: |
+          sudo apt install -y bc bison build-essential ccache curl flex git gnupg gperf libncurses5-dev libssl-dev python3 python3-pip rsync unzip wget zip
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
-          mkdir -p ~/twrp && cd ~/twrp
 
-      - name: Clone minimal manifest
+      - name: Initialize TWRP source
         run: |
-          cd ~
-          mkdir -p twrp && cd twrp
+          mkdir -p ~/twrp && cd ~/twrp
           repo init -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git -b twrp-12.1
-          git clone https://github.com/tata15-pixel/android_device_samsung_a15x.git -b twrp device/samsung/a15x
-          repo sync -j$(nproc --all)
+          repo sync -j$(nproc) --force-sync
 
-      - name: Build TWRP
+      - name: Clone device tree
+        run: |
+          cd ~/twrp
+          git clone https://github.com/devhunter1/android_device_samsung_a15x device/samsung/a15x
+
+      - name: Start TWRP build
         run: |
           cd ~/twrp
           source build/envsetup.sh
           lunch twrp_a15x-eng
-          mka recoveryimage
+          make -j$(nproc) recoveryimage
 
-      - name: Upload recovery image
+      - name: Upload output
         uses: actions/upload-artifact@v3
         with:
-          name: twrp-recovery
+          name: twrp-recovery.img
           path: ~/twrp/out/target/product/a15x/recovery.img
