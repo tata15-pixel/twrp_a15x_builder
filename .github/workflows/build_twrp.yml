@@ -5,7 +5,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04  # ✅ Fix error upload-artifact@v3
+    runs-on: ubuntu-22.04  # lebih stabil daripada ubuntu-latest
 
     steps:
       - name: Checkout this repo
@@ -15,8 +15,8 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y bc bison build-essential ccache curl flex git gnupg gperf libncurses5-dev libssl-dev python3 python3-pip rsync unzip wget zip
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
+          git config --global user.name "tata15-pixel"
+          git config --global user.email "fitskyyt1121@gmail.com"
 
       - name: Initialize TWRP source
         run: |
@@ -29,6 +29,13 @@ jobs:
           cd ~/twrp
           git clone https://github.com/devhunter1/android_device_samsung_a15x device/samsung/a15x
 
+          # dummy kernel & vendor supaya build nggak error
+          mkdir -p kernel/samsung/a15x
+          echo "// dummy kernel" > kernel/samsung/a15x/Android.mk
+
+          mkdir -p vendor/samsung/a15x
+          echo "// dummy vendor" > vendor/samsung/a15x/Android.mk
+
       - name: Start TWRP build
         run: |
           cd ~/twrp
@@ -37,7 +44,7 @@ jobs:
           make -j$(nproc) recoveryimage
 
       - name: Upload output
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v2  # versi stabil
         with:
           name: twrp-recovery.img
           path: ~/twrp/out/target/product/a15x/recovery.img
